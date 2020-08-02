@@ -53,6 +53,48 @@ gr = List[rma, pred]; Show[ListLinePlot[Table[gr[[i]], {i, 1, Length[gr]}]]]
 Below is the code for the spectral dimension approximation. We run a random walk using thee adjacency matrix as a set of the update rules.  Essentially, it is a 
 Markov chain with a uniform probability distribution for each node that is connected to the starting node. Here is the result of the spectral dimension approximation 
 for the example graph. 
+``` 
+getTrMatrix [gr_] := Module[{},
+adj = Normal[AdjacencyMatrix[gr]];
+adjTr = adj + Transpose[adj];
+adjNorm = Table[adjTr[[i]] / (adjTr[[i]] // Total), {i, 1, Length[adjTr]}]; 
+adjNorm] 
+``` 
+
+Then, we randomly select the next step and update the current position. We proceed until we get back at the starting point. 
+
+```
+randWalkStep[i_, matrix_] := Module[{}, 
+elements = Range[Length[matrix]];
+probs =  matrix[[i]];
+sample = RandomChoice[probs -> elements];
+sample]
+
+randWalk[matrix_,start_]:= Module[{},
+current = start; 
+walk = List[];
+count = 0 ;
+If[Length[matrix] == 1, AppendTo[walk, 0]; Print["zero dim"]; Break[],
+ While [True, sample = randWalkStep[current, matrix]; count ++; If[sample == start, AppendTo[walk, count]; Break[], current=sample]]];
+walk];
+``` 
+We define the starting point as the central and most connected node. 
+
+```
+randWalkGraph[state_]:= Module[{}, 
+gr = ResourceFunction["HypergraphToGraph"][state];
+center = Part[VertexList[IndexGraph[gr]],Ordering[RadialityCentrality[gr],All,Greater]][[1]];
+adjM = getTrMatrix [gr];
+If[Length[adjM] > 1,  
+res = Flatten[Table[randWalk[getTrMatrix [gr] , center], {i, 1,1000}]];
+Round[Mean[res]], 0]]
+``` 
+
+Here is the result of the spectral dimension approximation for the example graph. 
+``` 
+fs = ResourceFunction["WolframModel"][{{1,2,2},{3,1,4}}->{{2,5,2},{2,3,5},{4,5,5}},{{0,0,0},{0,0,0}},200, "StatesList"];
+ListLinePlot[ParallelTable[randWalkGraph[fs[[i]]], {i, 1, Length[fs]}]]
+```
 
 <img src="https://github.com/ddyachkova/Wolfram_Physics_Project/blob/master/Graphics/dims.png" width="40%" height="40%">
 

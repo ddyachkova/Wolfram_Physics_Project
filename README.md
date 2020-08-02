@@ -28,3 +28,53 @@ Let' s consider a simple grid corresponding to a `2_2 -> 3_3` rule.
 
 ``` eo = WolframModel[{{1, 2, 2}, {3, 1, 4}} -> {{2, 5, 2}, {2, 3, 5}, {4, 5, 5}}, {{0, 0, 0}, {0, 0, 0}}, 200]; eo["FinalStatePlot"] ```
 
+
+<img src="https://github.com/ddyachkova/Wolfram_Physics_Project/blob/master/Graphics/graph1.jpg" width="40%" height="40%">
+
+
+### Hausdorff dimension
+Now, let' s have a look at a Hausdorff dimension approximation. 
+
+<img src="https://github.com/ddyachkova/Wolfram_Physics_Project/blob/master/Graphics/graph2.jpg" width="40%" height="40%">
+
+The code below fits the linear regression to the curve and outputs the slope. 
+``` 
+rma = ResourceFunction["RaggedMeanAround"][Values[ResourceFunction["HypergraphNeighborhoodVolumes"][eo["FinalState"]]]];
+p=Predict[Range[Length[rma]]-> rma,Method->"LinearRegression"];
+pred = p[Range[Length[rma]]];
+slope = (pred[[-1]] - pred[[1]])/Length[pred];
+gr = List[rma, pred]; Show[ListLinePlot[Table[gr[[i]], {i, 1, Length[gr]}]]]
+``` 
+
+<img src="https://github.com/ddyachkova/Wolfram_Physics_Project/blob/master/Graphics/graph3.jpg" width="40%" height="40%">
+
+### Spectral dimension
+
+Below is the code for the spectral dimension approximation. We run a random walk using thee adjacency matrix as a set of the update rules.  Essentially, it is a 
+Markov chain with a uniform probability distribution for each node that is connected to the starting node. Here is the result of the spectral dimension approximation 
+for the example graph. 
+
+<img src="https://github.com/ddyachkova/Wolfram_Physics_Project/blob/master/Graphics/dims.png" width="40%" height="40%">
+
+### Results
+
+For the chosen signature, we have eight initial conditions. 
+
+<img src="https://github.com/ddyachkova/Wolfram_Physics_Project/blob/master/Graphics/init_cond.png" width="80%" height="80%">
+
+The histograms above show the distribution of the slope values for the initial condition values. We selected all of the rules that lead to connected hypergraphs. 
+As we can see, the majority of the the rules have dimensionality curves with zero slopes, which indicate stable universes. 
+
+<img src="https://github.com/ddyachkova/Wolfram_Physics_Project/blob/master/Graphics/hists.png" width="80%" height="80%">
+
+For the spectral dimension the results are the following. There are much less samples in this case due to computational complexity. We can see that for some conditions, we are getting negative slopes. That is an indicator of contracting universes. 
+
+<img src="https://github.com/ddyachkova/Wolfram_Physics_Project/blob/master/Graphics/hists2.png" width="80%" height="80%">
+
+
+### Conclusions
+We can conclude two things. First, we got a proof that there are stable, contracting and expanding universes. And the number of stable universes with the chosen signature `2_2 -> 3_2` is prevalent. Second, dimensionality approximation with neighborhood volume is not effective during the sensitivity to the boundary conditions. An alternative approach with spectral dimension that uses averaged random walks for each evolutionary state is more representative, however also computationally expensive. 
+The insights we got about the universes are relevant to the study of the early inflation models. 
+
+### Acknowledgments 
+A huge thanks to Jack Heimrath and Jonathan Gorard, who were wonderful and supportive mentors throughout the project. Also to Kiel Howe - a professor at Minerva Schools who provided theoretical and practical preparation for the physics track. Additionally, I thank Stephen Wolfram and the Summer School organizers for a remarkable opportunity to participate in this project. 
